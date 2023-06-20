@@ -16,7 +16,6 @@ codeunit 50100 "USPS Management"
                     Customer.Validate(County, CompareRec."USPS State");
                     Customer.Modify(true);
                 end;
-
         end;
     end;
 
@@ -62,7 +61,7 @@ codeunit 50100 "USPS Management"
         ResultTxt: Text;
         ErrorResultLbl: Label 'USPS returned an error: %1', Comment = '%1 is the error';
     begin
-        Parameters := XmlDocument.Create();
+        Parameters := XmlDocument.Create();     //створюється XML
         Address := XmlElement.Create('Adress');
         Address := XmlElement.Create('Adress');
         Address.Attributes().Set('ID', '0');
@@ -79,7 +78,7 @@ codeunit 50100 "USPS Management"
         Parameters.Add(AVR);
         Result := CallWebService('Verify', Parameters);
 
-        if GetField(Result, 'AddreddValidateResponse/Addredd[1]/Error/Description') <> '' then
+        if GetField(Result, 'AddreddValidateResponse/Addredd[1]/Error/Description') <> '' then      //парсинг продовження
             Error(ErrorResultLbl, GetField(Result, 'AddreddValidateResponse/Addredd[1]/Error/Description'));
 
         CompareRec."USPS FirmName" := GetField(Result, 'AddressvalidateResponse/Address[1]/FirmName');
@@ -98,7 +97,7 @@ codeunit 50100 "USPS Management"
         V: Variant;
         N: XmlNode;
     begin
-        if XML.SelectSingleNode(Path, N) then
+        if XML.SelectSingleNode(Path, N) then       //парсинг
             exit(N.AsXmlElement().InnerText);
     end;
 
@@ -127,20 +126,23 @@ codeunit 50100 "USPS Management"
         if not Setup.Get() then
             Error('UPSP Setup is needed, please enter URL and UserID');
         XMLin.WriteTo(XMLtxt);
+        //Message(XMLtxt);
         TypeHelper.UrlEncode(XMLtxt);
         QueryString := '?API=' + API + '&XML=' + XMLtxt;
+        //Message(QueryString);
         Request.Method := 'Get';
         Request.GetHeaders(Headers);
         Headers.Add('User-Agent', 'Dynamics 365 Business Central');
-        Request.SetRequestUri(Setup.URL + QueryString);
-        if Client.Send(Request, Response) then begin
+        Request.SetRequestUri(Setup.URL + QueryString);                 //Url адреса, яку я відправляю
+        if Client.Send(Request, Response) then begin        //якщо все відправилося, то отримуємо відповідь 
             if Response.HttpStatusCode() = 200 then begin
                 Response.Content().ReadAs(TxtOut);
-                if XmlDocument.ReadFrom(TxtOut, XMLOut) then
+                //Message(TxtOut);
+
+                if XmlDocument.ReadFrom(TxtOut, XMLOut) then        //відправляється назад XML документ, який потім процеситься
                     exit(XMLOut)
                 else
                     Error('Expected XML format from UPSP, got this instead: %1', TxtOut);
-
             end else
                 Error('UPSP web service call failed (status code %1)', Response.HttpStatusCode());
         end else

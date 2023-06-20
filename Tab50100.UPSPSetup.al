@@ -20,21 +20,6 @@ table 50100 "USPS Setup"
             Caption = 'UserID';
             DataClassification = ToBeClassified;
         }
-        field(4; ip; Text[30])
-        {
-            Caption = 'ip';
-            DataClassification = ToBeClassified;
-        }
-        field(5; network; Text[30])
-        {
-            Caption = 'network';
-            DataClassification = ToBeClassified;
-        }
-        field(6; versions; Text[30])
-        {
-            Caption = 'version';
-            DataClassification = ToBeClassified;
-        }
     }
     keys
     {
